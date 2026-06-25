@@ -8,6 +8,7 @@
     "dev:library": "tsx src/libraryServer.ts",
     "start:mobile": "node scripts/start-mobile-server.mjs",
     "build:library": "esbuild src/libraryServer.ts --bundle --platform=node --format=cjs --outfile=dist/libraryServer.cjs --minify --external:sharp --define:import.meta.url=globalThis.__import_meta_url --banner:js=\"globalThis.__import_meta_url=require('url').pathToFileURL(__filename).href;\"",
+    "build:server": "echo 'build:server is deprecated, use build:library'",
     "auth:hash": "tsx scripts/hash-auth-password.ts",
     "auth:reset": "tsx scripts/reset-auth-password.ts",
     "build:web": "esbuild web/app.ts --bundle --format=esm --outfile=web/dist/app.js && cp web/index.html web/styles.css web/dist/",

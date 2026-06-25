@@ -31,7 +31,7 @@ prompt_for_password() {
 
 build_local() {
   log "Building local bundles..."
-  (cd "$ROOT_DIR" && npm run build:library && npm run build:server && npm run build:web)
+  (cd "$ROOT_DIR" && npm run build:library && npm run build:web)
 }
 
 sync_remote() {

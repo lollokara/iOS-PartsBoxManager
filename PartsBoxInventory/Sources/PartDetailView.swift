@@ -12,6 +12,11 @@ final class PartDetailViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     func load(partID: String, settings: SettingsStore) async {
+        // Try loading from cache immediately for optimistic/offline load
+        if let cached = settings.getCachedPartDetail(partID: partID) {
+            self.part = cached
+        }
+
         guard let client = settings.apiClient else {
             errorMessage = "Set a base URL in Manage."
             part = nil
@@ -28,9 +33,20 @@ final class PartDetailViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            part = try await client.fetchPart(id: partID)
+            let fetched = try await client.fetchPart(id: partID)
+            part = fetched
+            settings.cachePartDetail(partID: partID, detail: fetched)
+            settings.setOffline(false)
             errorMessage = nil
         } catch {
+            if settings.isNetworkError(error) {
+                settings.setOffline(true)
+                if let cached = settings.getCachedPartDetail(partID: partID) {
+                    part = cached
+                    errorMessage = "Offline Mode: Showing cached data."
+                    return
+                }
+            }
             part = nil
             errorMessage = settings.handleAPIError(error)
         }
@@ -63,6 +79,7 @@ final class PartDetailViewModel: ObservableObject {
             )
             if let updatedPart = response.part {
                 part = updatedPart
+                settings.cachePartDetail(partID: partID, detail: updatedPart)
             } else {
                 await load(partID: partID, settings: settings)
             }
@@ -94,6 +111,7 @@ final class PartDetailViewModel: ObservableObject {
             let response = try await client.pullDetails(partID: partID)
             if let updatedPart = response.part {
                 part = updatedPart
+                settings.cachePartDetail(partID: partID, detail: updatedPart)
             } else {
                 await load(partID: partID, settings: settings)
             }
@@ -131,6 +149,7 @@ final class PartDetailViewModel: ObservableObject {
             )
             if let updatedPart = response.part {
                 part = updatedPart
+                settings.cachePartDetail(partID: partID, detail: updatedPart)
             } else {
                 await load(partID: partID, settings: settings)
             }
@@ -163,6 +182,7 @@ final class PartDetailViewModel: ObservableObject {
             let response = try await client.updateCategory(partID: partID, category: category, tag: tag)
             if let updatedPart = response.part {
                 part = updatedPart
+                settings.cachePartDetail(partID: partID, detail: updatedPart)
             } else {
                 await load(partID: partID, settings: settings)
             }
@@ -218,6 +238,17 @@ struct PartDetailView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let part = viewModel.part {
                 List {
+                    if settingsStore.isOffline {
+                        Section {
+                            HStack {
+                                Image(systemName: "wifi.slash")
+                                Text("Offline Mode — Edits Disabled")
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .foregroundStyle(.orange)
+                        }
+                    }
+
                     Section {
                         LabeledContent("Value", value: part.value ?? "—")
                         LabeledContent("PN", value: part.pn)
@@ -265,7 +296,7 @@ struct PartDetailView: View {
                         ForEach(part.locations) { location in
                             LocationAdjustmentRow(
                                 location: location,
-                                isAdjusting: viewModel.isAdjusting
+                                isAdjusting: viewModel.isAdjusting || settingsStore.isOffline
                             ) { delta in
                                 Task {
                                     await viewModel.adjust(
@@ -354,12 +385,14 @@ struct PartDetailView: View {
                     } label: {
                         Label("Add Location Stock", systemImage: "plus.circle")
                     }
+                    .disabled(settingsStore.isOffline)
 
                     Button {
                         isPresentingMetadataEditor = true
                     } label: {
                         Label("Edit Category", systemImage: "tag")
                     }
+                    .disabled(settingsStore.isOffline)
 
                     Button {
                         Task {
@@ -368,7 +401,7 @@ struct PartDetailView: View {
                     } label: {
                         Label("Pull Details", systemImage: "arrow.clockwise.circle")
                     }
-                    .disabled(viewModel.isLoading)
+                    .disabled(viewModel.isLoading || settingsStore.isOffline)
 
                     Button {
                         isPresentingPrintSheet = true
@@ -381,6 +414,7 @@ struct PartDetailView: View {
                     } label: {
                         Label("Delete Part", systemImage: "trash")
                     }
+                    .disabled(settingsStore.isOffline)
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }

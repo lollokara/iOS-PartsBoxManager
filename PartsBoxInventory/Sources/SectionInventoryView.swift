@@ -5,24 +5,30 @@ import VisionKit
 
 @MainActor
 final class SectionInventoryViewModel: ObservableObject {
+    @Published var allParts: [InventorySection: [MobilePartRowDTO]] = [:]
     @Published var rows: [MobilePartRowDTO] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
     func load(section: InventorySection, settings: SettingsStore) async {
+        // Optimistic UI: load cached or existing parts immediately so it switches instantly
+        if let existing = allParts[section] {
+            self.rows = existing
+        } else if let cached = settings.getCachedParts(section: section) {
+            self.rows = cached
+        }
+
         guard let initialClient = settings.apiClient else {
             errorMessage = "Set a base URL in Manage."
-            if rows.isEmpty {
-                rows = []
-            }
+            rows = []
+            allParts = [:]
             return
         }
 
         guard !settings.requiresLogin else {
             errorMessage = "Authentication required. Log in from Manage."
-            if rows.isEmpty {
-                rows = []
-            }
+            rows = []
+            allParts = [:]
             return
         }
 
@@ -30,18 +36,49 @@ final class SectionInventoryViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            let response = try await fetchPartsWithOneRetry(section: section, initialClient: initialClient, settings: settings)
-            rows = response.parts
-            errorMessage = nil
+            let inventorySections = InventorySection.allCases.filter { $0.isInventoryTab }
+            try await withThrowingTaskGroup(of: (InventorySection, [MobilePartRowDTO]).self) { group in
+                for sec in inventorySections {
+                    group.addTask {
+                        let response = try await self.fetchPartsWithOneRetry(section: sec, initialClient: initialClient, settings: settings)
+                        settings.cacheParts(section: sec, parts: response.parts)
+                        return (sec, response.parts)
+                    }
+                }
+                
+                var loaded: [InventorySection: [MobilePartRowDTO]] = [:]
+                for try await (sec, parts) in group {
+                    loaded[sec] = parts
+                }
+                
+                self.allParts = loaded
+                self.rows = loaded[section] ?? []
+                settings.setOffline(false)
+                errorMessage = nil
+            }
         } catch is CancellationError {
             // Ignore task cancellation
         } catch let urlError as URLError where urlError.code == .cancelled {
             // Ignore URL request cancellation
         } catch {
-            if rows.isEmpty {
-                rows = []
+            if settings.isNetworkError(error) {
+                settings.setOffline(true)
+                // Load all sections from cache
+                var loaded: [InventorySection: [MobilePartRowDTO]] = [:]
+                for sec in InventorySection.allCases.filter({ $0.isInventoryTab }) {
+                    if let cached = settings.getCachedParts(section: sec) {
+                        loaded[sec] = cached
+                    }
+                }
+                self.allParts = loaded
+                self.rows = loaded[section] ?? []
+                errorMessage = "Offline Mode: Showing cached data."
+            } else {
+                if rows.isEmpty {
+                    rows = []
+                }
+                errorMessage = settings.handleAPIError(error)
             }
-            errorMessage = settings.handleAPIError(error)
         }
     }
 
@@ -83,22 +120,6 @@ struct InventoryHomeView: View {
 
     private let sections = InventorySection.allCases.filter(\.isInventoryTab)
 
-    private var filteredRows: [MobilePartRowDTO] {
-        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            return viewModel.rows
-        }
-
-        let needle = trimmed.lowercased()
-        return tagFilteredRows.filter { row in
-            row.pn.lowercased().contains(needle)
-                || row.description.lowercased().contains(needle)
-                || (row.value?.lowercased().contains(needle) ?? false)
-                || String(row.quantity).contains(needle)
-                || row.displayTags.contains { $0.lowercased().contains(needle) }
-        }
-    }
-
     private var tagFilteredRows: [MobilePartRowDTO] {
         guard let selectedTag else {
             return viewModel.rows
@@ -106,8 +127,45 @@ struct InventoryHomeView: View {
         return viewModel.rows.filter { $0.displayTags.contains(selectedTag) }
     }
 
+    private var searchCurrentRows: [MobilePartRowDTO] {
+        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return tagFilteredRows
+        }
+        let needle = trimmed.lowercased()
+        return tagFilteredRows.filter { row in
+            matches(row: row, needle: needle)
+        }
+    }
+
+    private var searchOtherRows: [MobilePartRowDTO] {
+        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return []
+        }
+        let needle = trimmed.lowercased()
+        
+        let otherSections = InventorySection.allCases.filter { $0.isInventoryTab && $0 != section }
+        let otherRows = otherSections.flatMap { viewModel.allParts[$0] ?? [] }
+        let tagFilteredOther = selectedTag == nil ? otherRows : otherRows.filter { $0.displayTags.contains(selectedTag!) }
+        
+        return tagFilteredOther.filter { row in
+            matches(row: row, needle: needle)
+        }
+    }
+
+    private func matches(row: MobilePartRowDTO, needle: String) -> Bool {
+        row.pn.lowercased().contains(needle)
+            || row.description.lowercased().contains(needle)
+            || (row.value?.lowercased().contains(needle) ?? false)
+            || String(row.quantity).contains(needle)
+            || row.displayTags.contains { $0.lowercased().contains(needle) }
+    }
+
     private var availableTags: [String] {
-        Array(Set(viewModel.rows.flatMap(\.displayTags))).sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        let allLoadedParts = InventorySection.allCases.filter { $0.isInventoryTab }.flatMap { viewModel.allParts[$0] ?? [] }
+        let baseParts = allLoadedParts.isEmpty ? viewModel.rows : allLoadedParts
+        return Array(Set(baseParts.flatMap(\.displayTags))).sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
     }
 
     var body: some View {
@@ -144,6 +202,19 @@ struct InventoryHomeView: View {
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.circle)
                     .disabled(viewModel.isLoading)
+                }
+
+                if settingsStore.isOffline {
+                    HStack {
+                        Image(systemName: "wifi.slash")
+                        Text("Offline Mode — Edits Disabled")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.orange.opacity(0.85))
+                    .cornerRadius(12)
                 }
 
                 HStack(spacing: 10) {
@@ -205,7 +276,7 @@ struct InventoryHomeView: View {
                         action: nil
                     )
                     .textSelection(.enabled)
-                } else if filteredRows.isEmpty {
+                } else if searchCurrentRows.isEmpty && searchOtherRows.isEmpty {
                     if let scannerMessage {
                         InventoryStatusCard(
                             title: "Scanner",
@@ -217,14 +288,17 @@ struct InventoryHomeView: View {
                     }
 
                     InventoryStatusCard(
-                        title: "No \(section.title.lowercased())",
-                        message: viewModel.isLoading ? "Loading..." : "Nothing indexed for this section yet.",
-                        systemImage: "tray",
+                        title: searchText.isEmpty ? "No \(section.title.lowercased())" : "No matches",
+                        message: viewModel.isLoading ? "Loading..." : (searchText.isEmpty ? "Nothing indexed for this section yet." : "No parts match your search query."),
+                        systemImage: searchText.isEmpty ? "tray" : "magnifyingglass",
                         buttonTitle: nil,
                         action: nil
                     )
                 } else {
-                    ForEach(filteredRows) { row in
+                    let currentResults = searchCurrentRows
+                    let otherResults = searchOtherRows
+
+                    ForEach(currentResults) { row in
                         Button {
                             openPart(row.id)
                         } label: {
@@ -233,6 +307,28 @@ struct InventoryHomeView: View {
                                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                         }
                         .buttonStyle(.plain)
+                    }
+
+                    if !otherResults.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Divider()
+                                .padding(.vertical, 8)
+                            Text("Other Categories")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        ForEach(otherResults) { row in
+                            Button {
+                                openPart(row.id)
+                            } label: {
+                                InventoryPartRowView(row: row)
+                                    .padding(16)
+                                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
@@ -453,21 +549,6 @@ struct InventorySectionView: View {
     @State private var searchText = ""
     @State private var selectedTag: String?
 
-    private var filteredRows: [MobilePartRowDTO] {
-        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return tagFilteredRows
-        }
-
-        let needle = searchText.lowercased()
-        return tagFilteredRows.filter { row in
-            row.pn.lowercased().contains(needle)
-                || row.description.lowercased().contains(needle)
-                || (row.value?.lowercased().contains(needle) ?? false)
-                || String(row.quantity).contains(needle)
-                || row.displayTags.contains { $0.lowercased().contains(needle) }
-        }
-    }
-
     private var tagFilteredRows: [MobilePartRowDTO] {
         guard let selectedTag else {
             return viewModel.rows
@@ -475,8 +556,45 @@ struct InventorySectionView: View {
         return viewModel.rows.filter { $0.displayTags.contains(selectedTag) }
     }
 
+    private var searchCurrentRows: [MobilePartRowDTO] {
+        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return tagFilteredRows
+        }
+        let needle = trimmed.lowercased()
+        return tagFilteredRows.filter { row in
+            matches(row: row, needle: needle)
+        }
+    }
+
+    private var searchOtherRows: [MobilePartRowDTO] {
+        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return []
+        }
+        let needle = trimmed.lowercased()
+        
+        let otherSections = InventorySection.allCases.filter { $0.isInventoryTab && $0 != section }
+        let otherRows = otherSections.flatMap { viewModel.allParts[$0] ?? [] }
+        let tagFilteredOther = selectedTag == nil ? otherRows : otherRows.filter { $0.displayTags.contains(selectedTag!) }
+        
+        return tagFilteredOther.filter { row in
+            matches(row: row, needle: needle)
+        }
+    }
+
+    private func matches(row: MobilePartRowDTO, needle: String) -> Bool {
+        row.pn.lowercased().contains(needle)
+            || row.description.lowercased().contains(needle)
+            || (row.value?.lowercased().contains(needle) ?? false)
+            || String(row.quantity).contains(needle)
+            || row.displayTags.contains { $0.lowercased().contains(needle) }
+    }
+
     private var availableTags: [String] {
-        Array(Set(viewModel.rows.flatMap(\.displayTags))).sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        let allLoadedParts = InventorySection.allCases.filter { $0.isInventoryTab }.flatMap { viewModel.allParts[$0] ?? [] }
+        let baseParts = allLoadedParts.isEmpty ? viewModel.rows : allLoadedParts
+        return Array(Set(baseParts.flatMap(\.displayTags))).sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
     }
 
     var body: some View {
@@ -486,6 +604,17 @@ struct InventorySectionView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
+                    if settingsStore.isOffline {
+                        Section {
+                            HStack {
+                                Image(systemName: "wifi.slash")
+                                Text("Offline Mode — Edits Disabled")
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .foregroundStyle(.orange)
+                        }
+                    }
+
                     if !availableTags.isEmpty {
                         Section {
                             TagShortcutBar(tags: availableTags, selectedTag: $selectedTag)
@@ -500,7 +629,10 @@ struct InventorySectionView: View {
                         }
                     }
 
-                    if filteredRows.isEmpty {
+                    let currentResults = searchCurrentRows
+                    let otherResults = searchOtherRows
+
+                    if currentResults.isEmpty && otherResults.isEmpty {
                         Section {
                             ContentUnavailableView(
                                 viewModel.isLoading ? "Loading \(section.title.lowercased())" : "No parts",
@@ -509,11 +641,25 @@ struct InventorySectionView: View {
                                 .frame(maxWidth: .infinity)
                         }
                     } else {
-                        ForEach(filteredRows) { row in
-                            NavigationLink {
-                                PartDetailView(partID: row.id)
-                            } label: {
-                                InventoryPartRowView(row: row)
+                        Section {
+                            ForEach(currentResults) { row in
+                                NavigationLink {
+                                    PartDetailView(partID: row.id)
+                                } label: {
+                                    InventoryPartRowView(row: row)
+                                }
+                            }
+                        }
+
+                        if !otherResults.isEmpty {
+                            Section(header: Text("Other Categories")) {
+                                ForEach(otherResults) { row in
+                                    NavigationLink {
+                                        PartDetailView(partID: row.id)
+                                    } label: {
+                                        InventoryPartRowView(row: row)
+                                    }
+                                }
                             }
                         }
                     }

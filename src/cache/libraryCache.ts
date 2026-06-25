@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { ParsedPassive, PassiveType } from "../domain/passive.js";
+import { readJsonFile, writeJsonFile } from "../utils/atomicFile.js";
 
 export interface LibrarySnapshot {
   parts: ParsedPassive[];
@@ -41,22 +42,13 @@ export class LibraryCache {
   }
 
   async load(): Promise<void> {
-    try {
-      const text = await readFile(this.filePath, "utf8");
-      this.snapshot = JSON.parse(text) as LibrarySnapshot;
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-        this.snapshot = emptySnapshot();
-        return;
-      }
-      throw err;
-    }
+    const loaded = await readJsonFile<LibrarySnapshot>(this.filePath);
+    this.snapshot = loaded ?? emptySnapshot();
   }
 
   async set(snapshot: LibrarySnapshot): Promise<void> {
     this.snapshot = snapshot;
-    await mkdir(dirname(this.filePath), { recursive: true });
-    await writeFile(this.filePath, JSON.stringify(snapshot), "utf8");
+    await writeJsonFile(this.filePath, snapshot);
   }
 
   async updatePart(id: string, updater: (part: ParsedPassive) => ParsedPassive): Promise<ParsedPassive | null> {

@@ -61,6 +61,11 @@ final class ManageViewModel: ObservableObject {
             totalStockValue = uncategorizedResponse.totalStockValue ?? 0.0
             statusMessage = nil
 
+            // Cache locally
+            settings.cacheStorage(storage: storageResponse.storage)
+            settings.cacheUncategorized(parts: uncategorizedResponse.parts)
+            settings.setOffline(false)
+
             if selectedStorageID.isEmpty || !storageOptions.contains(where: { $0.id == selectedStorageID }) {
                 selectedStorageID = storageOptions.first { $0.id == settings.settings.lastStorageID }?.id
                     ?? storageOptions.first?.id
@@ -70,6 +75,26 @@ final class ManageViewModel: ObservableObject {
                 selectedPartID = uncategorizedParts.first?.id ?? ""
             }
         } catch {
+            if settings.isNetworkError(error) {
+                settings.setOffline(true)
+                if let cachedStorage = settings.getCachedStorage(),
+                   let cachedUncat = settings.getCachedUncategorized() {
+                    storageOptions = cachedStorage
+                    uncategorizedParts = cachedUncat
+                    totalStockValue = 0.0
+                    statusMessage = "Offline Mode: Showing cached data."
+                    
+                    if selectedStorageID.isEmpty || !storageOptions.contains(where: { $0.id == selectedStorageID }) {
+                        selectedStorageID = storageOptions.first { $0.id == settings.settings.lastStorageID }?.id
+                            ?? storageOptions.first?.id
+                            ?? ""
+                    }
+                    if selectedPartID.isEmpty || !uncategorizedParts.contains(where: { $0.id == selectedPartID }) {
+                        selectedPartID = uncategorizedParts.first?.id ?? ""
+                    }
+                    return
+                }
+            }
             statusMessage = settings.handleAPIError(error)
         }
     }
@@ -539,7 +564,7 @@ struct ManageView: View {
             } label: {
                 Label(viewModel.isWorking ? "Working" : "Force Sync", systemImage: "arrow.triangle.2.circlepath")
             }
-            .disabled(viewModel.isWorking)
+            .disabled(viewModel.isWorking || settingsStore.isOffline)
         }
     }
 
@@ -668,7 +693,7 @@ struct ManageView: View {
                     Label("Fetch Data", systemImage: "arrow.down.circle")
                 }
             }
-            .disabled(viewModel.isWorking || viewModel.scannedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .disabled(viewModel.isWorking || settingsStore.isOffline || viewModel.scannedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
             TextField("Description", text: $viewModel.scannedDescription, axis: .vertical)
                 .lineLimit(2...4)
@@ -692,7 +717,7 @@ struct ManageView: View {
                 Label("New location…", systemImage: "plus")
             }
             .buttonStyle(.borderless)
-            .disabled(viewModel.isWorking)
+            .disabled(viewModel.isWorking || settingsStore.isOffline)
 
             Picker("Category", selection: $viewModel.createCategory) {
                 Text("Auto-detect").tag(InventoryCategoryTaxonomy?.none)
@@ -744,6 +769,7 @@ struct ManageView: View {
             }
             .disabled(
                 viewModel.isWorking
+                    || settingsStore.isOffline
                     || viewModel.selectedStorageID.isEmpty
                     || viewModel.scannedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             )
@@ -785,7 +811,7 @@ struct ManageView: View {
             } label: {
                 Label("Save Category", systemImage: "tag.fill")
             }
-            .disabled(viewModel.isWorking || viewModel.selectedPartID.isEmpty)
+            .disabled(viewModel.isWorking || settingsStore.isOffline || viewModel.selectedPartID.isEmpty)
         }
     }
 
@@ -796,23 +822,40 @@ struct ManageView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(viewModel.storageOptions) { storage in
-                    Button {
-                        onSelectStorage?(storage.id, storage.displayName)
-                    } label: {
-                        HStack {
-                            Text(storage.displayName)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                if settingsStore.isOffline {
+                    ForEach(viewModel.storageOptions) { storage in
+                        Button {
+                            onSelectStorage?(storage.id, storage.displayName)
+                        } label: {
+                            HStack {
+                                Text(storage.displayName)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
-                }
-                .onDelete { offsets in
-                    Task {
-                        await viewModel.removeStorageLocations(at: offsets, settings: settingsStore)
+                } else {
+                    ForEach(viewModel.storageOptions) { storage in
+                        Button {
+                            onSelectStorage?(storage.id, storage.displayName)
+                        } label: {
+                            HStack {
+                                Text(storage.displayName)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .onDelete { offsets in
+                        Task {
+                            await viewModel.removeStorageLocations(at: offsets, settings: settingsStore)
+                        }
                     }
                 }
             }
@@ -821,6 +864,17 @@ struct ManageView: View {
 
     var body: some View {
         Form {
+            if settingsStore.isOffline {
+                Section {
+                    HStack {
+                        Image(systemName: "wifi.slash")
+                        Text("Offline Mode — Edits Disabled")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(.orange)
+                }
+            }
+
             connectionSection
             authenticationSection
             inventoryOverviewSection

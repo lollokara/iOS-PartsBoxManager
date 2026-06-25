@@ -109,6 +109,17 @@ struct HistoryView: View {
 
     var body: some View {
         List {
+            if settingsStore.isOffline {
+                Section {
+                    HStack {
+                        Image(systemName: "wifi.slash")
+                        Text("Offline Mode — Edits Disabled")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(.orange)
+                }
+            }
+
             if isWorking && history.isEmpty {
                 Section {
                     HStack {
@@ -212,6 +223,7 @@ struct HistoryView: View {
     private func startPolling() {
         stopPolling()
         timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
+            guard !settingsStore.isOffline else { return }
             Task {
                 await loadHistory(silent: true)
             }
@@ -224,6 +236,11 @@ struct HistoryView: View {
     }
 
     private func loadHistory(silent: Bool) async {
+        // Optimistic / Offline cache load
+        if let cached = settingsStore.getCachedHistory() {
+            history = cached
+        }
+
         guard let client = settingsStore.apiClient else {
             statusMessage = "Set a base URL in Manage."
             return
@@ -243,7 +260,20 @@ struct HistoryView: View {
             if response.history != history {
                 history = response.history
             }
+            settingsStore.cacheHistory(history: response.history)
+            settingsStore.setOffline(false)
         } catch {
+            if settingsStore.isNetworkError(error) {
+                settingsStore.setOffline(true)
+                if let cached = settingsStore.getCachedHistory() {
+                    history = cached
+                    statusMessage = "Offline Mode: Showing cached data."
+                    if !silent {
+                        isWorking = false
+                    }
+                    return
+                }
+            }
             statusMessage = settingsStore.handleAPIError(error)
         }
         

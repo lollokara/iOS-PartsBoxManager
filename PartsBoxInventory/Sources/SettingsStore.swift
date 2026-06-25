@@ -15,6 +15,7 @@ final class SettingsStore: ObservableObject {
     @Published private(set) var authAvailability: AuthAvailability = .unknown
     @Published private(set) var authNotice: String?
     @Published private(set) var authRevision: Int = 0
+    @Published var isOffline: Bool = false
 
     private let defaults: UserDefaults
     private let storageKey = "PartsBoxInventory.connectionSettings"
@@ -237,6 +238,156 @@ final class SettingsStore: ObservableObject {
             return clientError.errorDescription ?? fallback
         }
         return error.localizedDescription.isEmpty ? fallback : error.localizedDescription
+    }
+
+    // MARK: - Offline Cache Helpers
+    private var cacheDir: URL? {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+    }
+
+    func setOffline(_ offline: Bool) {
+        if isOffline != offline {
+            isOffline = offline
+        }
+    }
+
+    func cacheParts(section: InventorySection, parts: [MobilePartRowDTO]) {
+        guard let url = cacheDir?.appendingPathComponent("parts_\(section.rawValue).json") else { return }
+        do {
+            let data = try JSONEncoder().encode(parts)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            print("Failed to cache parts for \(section): \(error)")
+        }
+    }
+
+    func getCachedParts(section: InventorySection) -> [MobilePartRowDTO]? {
+        guard let url = cacheDir?.appendingPathComponent("parts_\(section.rawValue).json") else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode([MobilePartRowDTO].self, from: data)
+        } catch {
+            return nil
+        }
+    }
+
+    func cacheStorage(storage: [MobileStorageDTO]) {
+        guard let url = cacheDir?.appendingPathComponent("storage.json") else { return }
+        do {
+            let data = try JSONEncoder().encode(storage)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            print("Failed to cache storage: \(error)")
+        }
+    }
+
+    func getCachedStorage() -> [MobileStorageDTO]? {
+        guard let url = cacheDir?.appendingPathComponent("storage.json") else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode([MobileStorageDTO].self, from: data)
+        } catch {
+            return nil
+        }
+    }
+
+    func cacheUncategorized(parts: [MobilePartRowDTO]) {
+        guard let url = cacheDir?.appendingPathComponent("uncategorized.json") else { return }
+        do {
+            let data = try JSONEncoder().encode(parts)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            print("Failed to cache uncategorized parts: \(error)")
+        }
+    }
+
+    func getCachedUncategorized() -> [MobilePartRowDTO]? {
+        guard let url = cacheDir?.appendingPathComponent("uncategorized.json") else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode([MobilePartRowDTO].self, from: data)
+        } catch {
+            return nil
+        }
+    }
+
+    func cachePartDetail(partID: String, detail: MobilePartDetailDTO) {
+        guard let url = cacheDir?.appendingPathComponent("part_detail_\(partID).json") else { return }
+        do {
+            let data = try JSONEncoder().encode(detail)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            print("Failed to cache part detail: \(error)")
+        }
+    }
+
+    func getCachedPartDetail(partID: String) -> MobilePartDetailDTO? {
+        guard let url = cacheDir?.appendingPathComponent("part_detail_\(partID).json") else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode(MobilePartDetailDTO.self, from: data)
+        } catch {
+            return nil
+        }
+    }
+
+    func cacheStorageParts(storageID: String, parts: [MobilePartRowDTO]) {
+        guard let url = cacheDir?.appendingPathComponent("storage_parts_\(storageID).json") else { return }
+        do {
+            let data = try JSONEncoder().encode(parts)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            print("Failed to cache storage parts: \(error)")
+        }
+    }
+
+    func getCachedStorageParts(storageID: String) -> [MobilePartRowDTO]? {
+        guard let url = cacheDir?.appendingPathComponent("storage_parts_\(storageID).json") else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode([MobilePartRowDTO].self, from: data)
+        } catch {
+            return nil
+        }
+    }
+
+    func cacheHistory(history: [HistoryEntryDTO]) {
+        guard let url = cacheDir?.appendingPathComponent("history.json") else { return }
+        do {
+            let data = try JSONEncoder().encode(history)
+            try data.write(to: url, options: .atomic)
+        } catch {
+            print("Failed to cache history: \(error)")
+        }
+    }
+
+    func getCachedHistory() -> [HistoryEntryDTO]? {
+        guard let url = cacheDir?.appendingPathComponent("history.json") else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode([HistoryEntryDTO].self, from: data)
+        } catch {
+            return nil
+        }
+    }
+
+    func isNetworkError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        if nsError.domain == NSURLErrorDomain {
+            switch nsError.code {
+            case NSURLErrorCannotFindHost,
+                 NSURLErrorCannotConnectToHost,
+                 NSURLErrorNetworkConnectionLost,
+                 NSURLErrorDNSLookupFailed,
+                 NSURLErrorResourceUnavailable,
+                 NSURLErrorNotConnectedToInternet,
+                 NSURLErrorTimedOut:
+                return true
+            default:
+                return false
+            }
+        }
+        return false
     }
 }
 

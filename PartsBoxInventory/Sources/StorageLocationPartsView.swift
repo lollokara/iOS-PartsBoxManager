@@ -23,6 +23,17 @@ struct StorageLocationPartsView: View {
 
     var body: some View {
         List {
+            if settingsStore.isOffline {
+                Section {
+                    HStack {
+                        Image(systemName: "wifi.slash")
+                        Text("Offline Mode — Edits Disabled")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(.orange)
+                }
+            }
+
             if isWorking && parts.isEmpty {
                 Section {
                     HStack {
@@ -98,6 +109,11 @@ struct StorageLocationPartsView: View {
     }
 
     private func loadParts() async {
+        // Optimistic / Offline cache load
+        if let cached = settingsStore.getCachedStorageParts(storageID: storageID) {
+            parts = cached
+        }
+
         guard let client = settingsStore.apiClient else {
             statusMessage = "Set a base URL in Manage."
             return
@@ -114,7 +130,17 @@ struct StorageLocationPartsView: View {
         do {
             let response = try await client.fetchPartsForStorage(storageID: storageID)
             parts = response.parts
+            settingsStore.cacheStorageParts(storageID: storageID, parts: response.parts)
+            settingsStore.setOffline(false)
         } catch {
+            if settingsStore.isNetworkError(error) {
+                settingsStore.setOffline(true)
+                if let cached = settingsStore.getCachedStorageParts(storageID: storageID) {
+                    parts = cached
+                    statusMessage = "Offline Mode: Showing cached data."
+                    return
+                }
+            }
             statusMessage = settingsStore.handleAPIError(error)
         }
     }

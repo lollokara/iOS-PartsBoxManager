@@ -1,6 +1,5 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import type { OverrideRecord } from "../domain/passive.js";
+import { readJsonFile, writeJsonFile } from "../utils/atomicFile.js";
 
 type OverrideMap = Record<string, OverrideRecord>;
 
@@ -8,13 +7,8 @@ export class OverrideStore {
   constructor(private readonly filePath: string) {}
 
   async getAll(): Promise<OverrideMap> {
-    try {
-      const text = await readFile(this.filePath, "utf8");
-      return JSON.parse(text) as OverrideMap;
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === "ENOENT") return {};
-      throw err;
-    }
+    const loaded = await readJsonFile<OverrideMap>(this.filePath);
+    return loaded ?? {};
   }
 
   async set(partId: string, record: OverrideRecord): Promise<void> {
@@ -30,7 +24,6 @@ export class OverrideStore {
   }
 
   private async write(all: OverrideMap): Promise<void> {
-    await mkdir(dirname(this.filePath), { recursive: true });
-    await writeFile(this.filePath, JSON.stringify(all, null, 2), "utf8");
+    await writeJsonFile(this.filePath, all);
   }
 }

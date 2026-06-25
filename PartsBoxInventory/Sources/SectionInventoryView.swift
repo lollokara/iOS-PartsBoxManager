@@ -41,7 +41,7 @@ final class SectionInventoryViewModel: ObservableObject {
                 for sec in inventorySections {
                     group.addTask {
                         let response = try await self.fetchPartsWithOneRetry(section: sec, initialClient: initialClient, settings: settings)
-                        return (si fec, response.parts)
+                        return (sec, response.parts)
                     }
                 }
                 
@@ -109,7 +109,7 @@ final class SectionInventoryViewModel: ObservableObject {
     }
 
     nonisolated private func prefetchPartDetails(parts: [MobilePartRowDTO], settings: SettingsStore) async {
-        guard let client = settings.apiClient else { return }
+        guard let client = await settings.apiClient else { return }
         
         let maxConcurrent = 3
         var index = 0

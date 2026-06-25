@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Passive Library</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Passive Library</h1>
+      <div class="tabs">
+        <button data-tab="resistor" class="active">Resistors</button>
+        <button data-tab="capacitor">Capacitors</button>
+        <button data-tab="inductor">Inductors</button>
+        <button data-tab="review">Needs review</button>
+      </div>
+      <div class="sync">
+        <span id="digikey-status" style="margin-right: 12px; font-size: 12px;"></span>
+        <span id="synced"></span>
+        <button id="refresh">Refresh</button>
+      </div>
+    </header>
+    <section id="auth" class="auth hidden"></section>
+    <div id="filters" class="filters"></div>
+    <main id="list"></main>
+    <aside id="detail" class="detail hidden"></aside>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

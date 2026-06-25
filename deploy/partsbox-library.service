@@ -1,0 +1,16 @@
+# Copy to /etc/systemd/system/partsbox-library.service on the Proxmox host/LXC.
+[Unit]
+Description=PartsBox Passive Library Browser
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/partsbox-manager
+EnvironmentFile=/opt/partsbox-manager/.env
+ExecStart=/usr/bin/node dist/libraryServer.cjs
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

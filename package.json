@@ -1,0 +1,34 @@
+{
+  "name": "partsbox-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "dev:library": "tsx src/libraryServer.ts",
+    "start:mobile": "node scripts/start-mobile-server.mjs",
+    "build:library": "esbuild src/libraryServer.ts --bundle --platform=node --format=cjs --outfile=dist/libraryServer.cjs --minify --external:sharp --define:import.meta.url=globalThis.__import_meta_url --banner:js=\"globalThis.__import_meta_url=require('url').pathToFileURL(__filename).href;\"",
+    "auth:hash": "tsx scripts/hash-auth-password.ts",
+    "auth:reset": "tsx scripts/reset-auth-password.ts",
+    "build:web": "esbuild web/app.ts --bundle --format=esm --outfile=web/dist/app.js && cp web/index.html web/styles.css web/dist/",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@fastify/static": "^8.3.0",
+    "bonjour-service": "^1.4.2",
+    "bwip-js": "^4.5.1",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.1",
+    "sharp": "^0.33.5",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "esbuild": "^0.28.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

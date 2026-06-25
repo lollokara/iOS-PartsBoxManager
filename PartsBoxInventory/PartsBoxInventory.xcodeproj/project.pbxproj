@@ -1,0 +1,411 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7A0F4D2A2D5B400100000001 /* InventoryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D292D5B400100000001 /* InventoryApp.swift */; };
+		7A0F4D2C2D5B400100000002 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D2B2D5B400100000002 /* AppRootView.swift */; };
+		7A0F4D2E2D5B400100000003 /* InventoryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D2D2D5B400100000003 /* InventoryModels.swift */; };
+		7A0F4D302D5B400100000004 /* InventoryAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D2F2D5B400100000004 /* InventoryAPIClient.swift */; };
+		7A0F4D322D5B400100000005 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D312D5B400100000005 /* SettingsStore.swift */; };
+		7A0F4D342D5B400100000006 /* SectionInventoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D332D5B400100000006 /* SectionInventoryView.swift */; };
+		7A0F4D362D5B400100000007 /* PartDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D352D5B400100000007 /* PartDetailView.swift */; };
+		7A0F4D382D5B400100000008 /* ManageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D372D5B400100000008 /* ManageView.swift */; };
+		7A0F4D402D5B400100000017 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A0F4D402D5B400100000016 /* Assets.xcassets */; };
+		7A0F4D412D5B400100000015 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0F4D402D5B400100000015 /* KeychainHelper.swift */; };
+		7AB1E0010000000000000101 /* NiimbotPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000001 /* NiimbotPacket.swift */; };
+		7AB1E0010000000000000102 /* NiimbotCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000002 /* NiimbotCommands.swift */; };
+		7AB1E0010000000000000103 /* LabelImageEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000003 /* LabelImageEncoder.swift */; };
+		7AB1E0010000000000000104 /* NiimbotPrinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000004 /* NiimbotPrinter.swift */; };
+		7AB1E0010000000000000105 /* PrintLabelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000005 /* PrintLabelSheet.swift */; };
+		7AB1E0010000000000000106 /* NiimbotDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000006 /* NiimbotDiscovery.swift */; };
+		7AB1E0010000000000000107 /* LabelPaperSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000007 /* LabelPaperSize.swift */; };
+		7AB1E0010000000000000108 /* PrintStorageLabelSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000008 /* PrintStorageLabelSheet.swift */; };
+		7AB1E0010000000000000109 /* StorageLocationPartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB1E0010000000000000009 /* StorageLocationPartsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		7A0F4D272D5B400100000000 /* PartsBoxInventory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PartsBoxInventory.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A0F4D292D5B400100000001 /* InventoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryApp.swift; sourceTree = "<group>"; };
+		7A0F4D2B2D5B400100000002 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
+		7A0F4D2D2D5B400100000003 /* InventoryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryModels.swift; sourceTree = "<group>"; };
+		7A0F4D2F2D5B400100000004 /* InventoryAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventoryAPIClient.swift; sourceTree = "<group>"; };
+		7A0F4D312D5B400100000005 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		7A0F4D332D5B400100000006 /* SectionInventoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionInventoryView.swift; sourceTree = "<group>"; };
+		7A0F4D352D5B400100000007 /* PartDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartDetailView.swift; sourceTree = "<group>"; };
+		7A0F4D372D5B400100000008 /* ManageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageView.swift; sourceTree = "<group>"; };
+		7A0F4D402D5B400100000014 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7A0F4D402D5B400100000015 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		7A0F4D402D5B400100000016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7AB1E0010000000000000001 /* NiimbotPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiimbotPacket.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000002 /* NiimbotCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiimbotCommands.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000003 /* LabelImageEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelImageEncoder.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000004 /* NiimbotPrinter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiimbotPrinter.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000005 /* PrintLabelSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintLabelSheet.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000006 /* NiimbotDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiimbotDiscovery.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000007 /* LabelPaperSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelPaperSize.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000008 /* PrintStorageLabelSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintStorageLabelSheet.swift; sourceTree = "<group>"; };
+		7AB1E0010000000000000009 /* StorageLocationPartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageLocationPartsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7A0F4D262D5B400100000009 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7A0F4D232D5B40010000000A = {
+			isa = PBXGroup;
+			children = (
+				7A0F4D242D5B40010000000B /* Sources */,
+				7A0F4D402D5B400100000016 /* Assets.xcassets */,
+				7A0F4D402D5B400100000014 /* Info.plist */,
+				7A0F4D252D5B40010000000C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7A0F4D242D5B40010000000B /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				7A0F4D292D5B400100000001 /* InventoryApp.swift */,
+				7A0F4D2B2D5B400100000002 /* AppRootView.swift */,
+				7A0F4D2D2D5B400100000003 /* InventoryModels.swift */,
+				7A0F4D2F2D5B400100000004 /* InventoryAPIClient.swift */,
+				7A0F4D312D5B400100000005 /* SettingsStore.swift */,
+				7A0F4D332D5B400100000006 /* SectionInventoryView.swift */,
+				7A0F4D352D5B400100000007 /* PartDetailView.swift */,
+				7A0F4D372D5B400100000008 /* ManageView.swift */,
+				7A0F4D402D5B400100000015 /* KeychainHelper.swift */,
+				7AB1E0010000000000000001 /* NiimbotPacket.swift */,
+				7AB1E0010000000000000002 /* NiimbotCommands.swift */,
+				7AB1E0010000000000000003 /* LabelImageEncoder.swift */,
+				7AB1E0010000000000000007 /* LabelPaperSize.swift */,
+				7AB1E0010000000000000006 /* NiimbotDiscovery.swift */,
+				7AB1E0010000000000000004 /* NiimbotPrinter.swift */,
+				7AB1E0010000000000000005 /* PrintLabelSheet.swift */,
+				7AB1E0010000000000000008 /* PrintStorageLabelSheet.swift */,
+				7AB1E0010000000000000009 /* StorageLocationPartsView.swift */,
+			);
+			path = Sources;
+			sourceTree = SOURCE_ROOT;
+		};
+		7A0F4D252D5B40010000000C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7A0F4D272D5B400100000000 /* PartsBoxInventory.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7A0F4D282D5B40010000000D /* PartsBoxInventory */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7A0F4D392D5B40010000000E /* Build configuration list for PBXNativeTarget "PartsBoxInventory" */;
+			buildPhases = (
+				7A0F4D212D5B40010000000F /* Sources */,
+				7A0F4D262D5B400100000009 /* Frameworks */,
+				7A0F4D262D5B400100000018 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PartsBoxInventory;
+			packageProductDependencies = (
+			);
+			productName = PartsBoxInventory;
+			productReference = 7A0F4D272D5B400100000000 /* PartsBoxInventory.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7A0F4D222D5B400100000010 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					7A0F4D282D5B40010000000D = {
+						CreatedOnToolsVersion = 26.5;
+					};
+				};
+			};
+			buildConfigurationList = 7A0F4D382D5B400100000011 /* Build configuration list for PBXProject "PartsBoxInventory" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 7A0F4D232D5B40010000000A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7A0F4D252D5B40010000000C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7A0F4D282D5B40010000000D /* PartsBoxInventory */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7A0F4D262D5B400100000018 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A0F4D402D5B400100000017 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7A0F4D212D5B40010000000F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A0F4D2A2D5B400100000001 /* InventoryApp.swift in Sources */,
+				7A0F4D2C2D5B400100000002 /* AppRootView.swift in Sources */,
+				7A0F4D2E2D5B400100000003 /* InventoryModels.swift in Sources */,
+				7A0F4D302D5B400100000004 /* InventoryAPIClient.swift in Sources */,
+				7A0F4D322D5B400100000005 /* SettingsStore.swift in Sources */,
+				7A0F4D342D5B400100000006 /* SectionInventoryView.swift in Sources */,
+				7A0F4D362D5B400100000007 /* PartDetailView.swift in Sources */,
+				7A0F4D382D5B400100000008 /* ManageView.swift in Sources */,
+				7A0F4D412D5B400100000015 /* KeychainHelper.swift in Sources */,
+				7AB1E0010000000000000101 /* NiimbotPacket.swift in Sources */,
+				7AB1E0010000000000000102 /* NiimbotCommands.swift in Sources */,
+				7AB1E0010000000000000103 /* LabelImageEncoder.swift in Sources */,
+				7AB1E0010000000000000107 /* LabelPaperSize.swift in Sources */,
+				7AB1E0010000000000000106 /* NiimbotDiscovery.swift in Sources */,
+				7AB1E0010000000000000104 /* NiimbotPrinter.swift in Sources */,
+				7AB1E0010000000000000105 /* PrintLabelSheet.swift in Sources */,
+				7AB1E0010000000000000108 /* PrintStorageLabelSheet.swift in Sources */,
+				7AB1E0010000000000000109 /* StorageLocationPartsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		7A0F4D3A2D5B400100000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1.3;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.karavania.inventory;
+				PRODUCT_NAME = PartsBoxInventory;
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		7A0F4D3B2D5B400100000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1.3;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.karavania.inventory;
+				PRODUCT_NAME = PartsBoxInventory;
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7A0F4D3C2D5B400100000014 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "PartsBox Inventory";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.partsbox.inventory;
+				PRODUCT_NAME = PartsBoxInventory;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		7A0F4D3D2D5B400100000015 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "PartsBox Inventory";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.partsbox.inventory;
+				PRODUCT_NAME = PartsBoxInventory;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7A0F4D382D5B400100000011 /* Build configuration list for PBXProject "PartsBoxInventory" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A0F4D3C2D5B400100000014 /* Debug */,
+				7A0F4D3D2D5B400100000015 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7A0F4D392D5B40010000000E /* Build configuration list for PBXNativeTarget "PartsBoxInventory" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A0F4D3A2D5B400100000012 /* Debug */,
+				7A0F4D3B2D5B400100000013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7A0F4D222D5B400100000010 /* Project object */;
+}

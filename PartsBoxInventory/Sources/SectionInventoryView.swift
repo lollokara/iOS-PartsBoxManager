@@ -41,7 +41,7 @@ final class SectionInventoryViewModel: ObservableObject {
                 for sec in inventorySections {
                     group.addTask {
                         let response = try await self.fetchPartsWithOneRetry(section: sec, initialClient: initialClient, settings: settings)
-                        return (sec, response.parts)
+                        return (si fec, response.parts)
                     }
                 }
                 
@@ -55,6 +55,12 @@ final class SectionInventoryViewModel: ObservableObject {
                 self.rows = loaded[section] ?? []
                 settings.setOffline(false)
                 errorMessage = nil
+                
+                // Prefetch all loaded parts' details in the background
+                let allPartsList = loaded.flatMap { $0.value }
+                Task.detached(priority: .background) {
+                    await self.prefetchPartDetails(parts: allPartsList, settings: settings)
+                }
             }
         } catch is CancellationError {
             // Ignore task cancellation
@@ -99,6 +105,39 @@ final class SectionInventoryViewModel: ObservableObject {
             } catch {
                 throw error
             }
+        }
+    }
+
+    nonisolated private func prefetchPartDetails(parts: [MobilePartRowDTO], settings: SettingsStore) async {
+        guard let client = settings.apiClient else { return }
+        
+        let maxConcurrent = 3
+        var index = 0
+        
+        while index < parts.count {
+            if Task.isCancelled { break }
+            let chunk = parts[index..<min(index + maxConcurrent, parts.count)]
+            index += maxConcurrent
+            
+            await withTaskGroup(of: Void.self) { group in
+                for part in chunk {
+                    let hasCache = await settings.getCachedPartDetail(partID: part.id) != nil
+                    if hasCache {
+                        continue
+                    }
+                    
+                    group.addTask {
+                        do {
+                            let detail = try await client.fetchPart(id: part.id)
+                            await settings.cachePartDetail(partID: part.id, detail: detail)
+                        } catch {
+                            // Ignore failures for individual parts during prefetching
+                        }
+                    }
+                }
+            }
+            
+            try? await Task.sleep(for: .milliseconds(100))
         }
     }
 }

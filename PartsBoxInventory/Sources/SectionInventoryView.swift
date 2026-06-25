@@ -41,7 +41,6 @@ final class SectionInventoryViewModel: ObservableObject {
                 for sec in inventorySections {
                     group.addTask {
                         let response = try await self.fetchPartsWithOneRetry(section: sec, initialClient: initialClient, settings: settings)
-                        settings.cacheParts(section: sec, parts: response.parts)
                         return (sec, response.parts)
                     }
                 }
@@ -49,6 +48,7 @@ final class SectionInventoryViewModel: ObservableObject {
                 var loaded: [InventorySection: [MobilePartRowDTO]] = [:]
                 for try await (sec, parts) in group {
                     loaded[sec] = parts
+                    settings.cacheParts(section: sec, parts: parts)
                 }
                 
                 self.allParts = loaded

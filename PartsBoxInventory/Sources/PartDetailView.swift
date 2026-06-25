@@ -17,6 +17,17 @@ final class PartDetailViewModel: ObservableObject {
             self.part = cached
         }
 
+        if settings.isOffline {
+            if let cached = settings.getCachedPartDetail(partID: partID) {
+                self.part = cached
+                self.errorMessage = "Offline Mode: Showing cached data."
+            } else {
+                self.part = nil
+                self.errorMessage = "Offline Mode: Part details not cached."
+            }
+            return
+        }
+
         guard let client = settings.apiClient else {
             errorMessage = "Set a base URL in Manage."
             part = nil
@@ -244,6 +255,15 @@ struct PartDetailView: View {
                                 Image(systemName: "wifi.slash")
                                 Text("Offline Mode — Edits Disabled")
                                     .font(.subheadline.weight(.semibold))
+                                Spacer()
+                                Button("Retry") {
+                                    settingsStore.setOffline(false)
+                                    Task {
+                                        await viewModel.load(partID: partID, settings: settingsStore)
+                                    }
+                                }
+                                .buttonStyle(.borderless)
+                                .font(.caption.weight(.bold))
                             }
                             .foregroundStyle(.orange)
                         }
@@ -445,6 +465,7 @@ struct PartDetailView: View {
             PrintLabelSheet(partID: partID)
         }
         .refreshable {
+            settingsStore.setOffline(false)
             await viewModel.load(partID: partID, settings: settingsStore)
         }
         .task(id: "\(settingsStore.resolvedBaseURL?.absoluteString ?? partID)-\(settingsStore.authRevision)") {

@@ -32,6 +32,30 @@ final class ManageViewModel: ObservableObject {
     }
 
     func loadLookups(settings: SettingsStore) async {
+        if settings.isOffline {
+            if let cachedStorage = settings.getCachedStorage(),
+               let cachedUncat = settings.getCachedUncategorized() {
+                storageOptions = cachedStorage
+                uncategorizedParts = cachedUncat
+                totalStockValue = 0.0
+                statusMessage = "Offline Mode: Showing cached data."
+                
+                if selectedStorageID.isEmpty || !storageOptions.contains(where: { $0.id == selectedStorageID }) {
+                    selectedStorageID = storageOptions.first { $0.id == settings.settings.lastStorageID }?.id
+                        ?? storageOptions.first?.id
+                        ?? ""
+                }
+                if selectedPartID.isEmpty || !uncategorizedParts.contains(where: { $0.id == selectedPartID }) {
+                    selectedPartID = uncategorizedParts.first?.id ?? ""
+                }
+            } else {
+                storageOptions = []
+                uncategorizedParts = []
+                statusMessage = "Offline Mode: Data not cached."
+            }
+            return
+        }
+
         guard let client = settings.apiClient else {
             storageOptions = []
             uncategorizedParts = []
@@ -870,6 +894,15 @@ struct ManageView: View {
                         Image(systemName: "wifi.slash")
                         Text("Offline Mode — Edits Disabled")
                             .font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Button("Retry") {
+                            settingsStore.setOffline(false)
+                            Task {
+                                await viewModel.loadLookups(settings: settingsStore)
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(.caption.weight(.bold))
                     }
                     .foregroundStyle(.orange)
                 }

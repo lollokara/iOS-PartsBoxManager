@@ -115,6 +115,15 @@ struct HistoryView: View {
                         Image(systemName: "wifi.slash")
                         Text("Offline Mode — Edits Disabled")
                             .font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Button("Retry") {
+                            settingsStore.setOffline(false)
+                            Task {
+                                await loadHistory(silent: false)
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(.caption.weight(.bold))
                     }
                     .foregroundStyle(.orange)
                 }
@@ -209,6 +218,7 @@ struct HistoryView: View {
         }
         .navigationTitle("History")
         .refreshable {
+            settingsStore.setOffline(false)
             await loadHistory(silent: true)
         }
         .task {
@@ -239,6 +249,20 @@ struct HistoryView: View {
         // Optimistic / Offline cache load
         if let cached = settingsStore.getCachedHistory() {
             history = cached
+        }
+
+        if settingsStore.isOffline {
+            if let cached = settingsStore.getCachedHistory() {
+                history = cached
+                statusMessage = "Offline Mode: Showing cached data."
+            } else {
+                history = []
+                statusMessage = "Offline Mode: History not cached."
+            }
+            if !silent {
+                isWorking = false
+            }
+            return
         }
 
         guard let client = settingsStore.apiClient else {

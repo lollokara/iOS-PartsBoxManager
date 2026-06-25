@@ -29,6 +29,15 @@ struct StorageLocationPartsView: View {
                         Image(systemName: "wifi.slash")
                         Text("Offline Mode — Edits Disabled")
                             .font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Button("Retry") {
+                            settingsStore.setOffline(false)
+                            Task {
+                                await loadParts()
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .font(.caption.weight(.bold))
                     }
                     .foregroundStyle(.orange)
                 }
@@ -98,6 +107,7 @@ struct StorageLocationPartsView: View {
             }
         }
         .refreshable {
+            settingsStore.setOffline(false)
             await loadParts()
         }
         .sheet(isPresented: $isPresentingPrintLabel) {
@@ -112,6 +122,17 @@ struct StorageLocationPartsView: View {
         // Optimistic / Offline cache load
         if let cached = settingsStore.getCachedStorageParts(storageID: storageID) {
             parts = cached
+        }
+
+        if settingsStore.isOffline {
+            if let cached = settingsStore.getCachedStorageParts(storageID: storageID) {
+                parts = cached
+                statusMessage = "Offline Mode: Showing cached data."
+            } else {
+                parts = []
+                statusMessage = "Offline Mode: Parts not cached."
+            }
+            return
         }
 
         guard let client = settingsStore.apiClient else {
